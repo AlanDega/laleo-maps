@@ -2,6 +2,7 @@
 <html>
   <head>
     <style>
+      /* Establece el tamaño del elemento div que va a contener el mapa*/
       #map {
         height: 400px;
         width: 600px;
@@ -9,27 +10,34 @@
     </style>
   </head>
   <body>
+    <!-- los elementos div para el mapa y el mensaje -->
   <div id="map"></div>
   <div id="msg"></div>
   <script>
+
+    // inicializo y agrego el mapa
 var map;
 function initMap() {
+    // el mapa esta centralizado entre Laleo y Enrique Rebsamen
 const center = {lat:19.375226, lng:-99.159239};
 const options = {zoom: 15, scaleControl: true, center: center};
 map = new google.maps.Map( document.getElementById('map'), options);
+
+// prueba de constructor Polyline
   poly = new google.maps.Polyline({
     path: [],
     strokeColor: '#FF0000',
     strokeWeight: 3
   });
-  
+  // posición inicial de los markers 
 let laleo = {lat:19.386048, lng:-99.157093};
 let rebsamen = {lat:19.383660, lng:-99.161054};
 var mk1 = new google.maps.Marker({position: laleo, map: map});
 var mk2 = new google.maps.Marker({position: rebsamen, map: map});
 let directionsService = new google.maps.DirectionsService();
-  let directionsRenderer = new google.maps.DirectionsRenderer();
-  directionsRenderer.setMap(map); 
+let directionsRenderer = new google.maps.DirectionsRenderer();
+  directionsRenderer.setMap(map); // el mapa renderiza las direcciones
+  // crea una ruta entre los puntos establecidos en los markers
   const route = {
       origin: laleo,
       destination: rebsamen,
@@ -73,7 +81,7 @@ let directionsService = new google.maps.DirectionsService();
           var stepThreeLats =[]
           var stepThreeLngs=[]
 
-          // paso 0 ------------------------------------------------
+   // procesamiento de la información de las coordenadas para el paso 1 ------------------------------------------------
 
           for(i = 0; i < decodedStep.length; i++ ){
             if(i % 2 === 0 || 0) {
@@ -87,14 +95,16 @@ let directionsService = new google.maps.DirectionsService();
             }
           }
 
+    // junta todas las coordenadas del paso 1 en un array de latitud y otro de longitud
+
           for (i=0; i < lats.length; i++){
             stepOneLats.push(lats[i][0])
           }
           for (i=0; i < lngs.length; i++){
             stepOneLngs.push(lngs[i][0])
           }
-    
-      // // paso 1 ------------------------------------------
+
+  // procesamiento de la información de las coordenadas para el paso 2 ------------------------------------------------
 
           for(i = 0; i < decodedStep1.length; i++ ){
             if(i % 2 === 0 || 0) {
@@ -108,6 +118,8 @@ let directionsService = new google.maps.DirectionsService();
             } 
           } 
 
+    // junta todas las coordenadas del paso 2 en un array de latitud y otro de longitud
+
           for (i=0; i < lats1.length; i++){
             stepTwoLats.push(lats1[i][0])
           }
@@ -115,7 +127,7 @@ let directionsService = new google.maps.DirectionsService();
             stepTwoLngs.push(lngs1[i][0])
           }
 
-// paso 2 ----------------------------------------------------------
+   // procesamiento de información de las coordenadas para el paso 3 ------------------------------------------------
 
           for(i = 0; i < decodedStep2.length; i++ ){
             if(i % 2 === 0 || 0) {
@@ -128,6 +140,8 @@ let directionsService = new google.maps.DirectionsService();
               lngs2.push(concatStep5);
               } 
           }
+
+    // junta todas las coordenadas del paso 3 en un array de latitud y otro de longitud
         
           for (i=0; i < lats2.length; i++){
             stepThreeLats.push(lats2[i][0]);
@@ -136,7 +150,7 @@ let directionsService = new google.maps.DirectionsService();
             stepThreeLngs.push(lngs2[i][0]);
           }
           
-                    // actualización de la posición del marker en el mapa 
+  // actualización de la posición del marker en el mapa -----------------------------------------------
 
           let e = 1;
           let y = 0;
@@ -152,7 +166,7 @@ let directionsService = new google.maps.DirectionsService();
           if (e === 1){
                 document.getElementById('msg').innerHTML = directionsData.steps[0].instructions  + "(" + directionsData.steps[0].duration.text + ").";
               }
-              
+
           function step1(){
             laleo.lat = parseFloat(stepOneLats[e]);
             laleo.lng = parseFloat(stepOneLngs[e]);
@@ -163,6 +177,8 @@ let directionsService = new google.maps.DirectionsService();
             console.log('lngs',stepOneLngs[e]);
             console.log('e',e);
             console.log('interval1',interval1);
+
+            // renderiza las indicaciones y establece y elimina el método setInterval()
               
               if (e === lats.length -1){
                 document.getElementById('msg').innerHTML = directionsData.steps[1].instructions;
@@ -183,11 +199,13 @@ let directionsService = new google.maps.DirectionsService();
               console.log('lngs',stepTwoLngs[y])
               console.log('y',y);
               console.log('interval2',interval2)
+
+              // renderiza las indicaciones y establece y elimina el método setInterval()
+
                 if (y === 2){
                   document.getElementById('msg').innerHTML = directionsData.steps[2].instructions  + "(" + directionsData.steps[0].duration.text + ").";
                 }
                 if (y === lats1.length -2){
-                 
                   document.getElementById('msg').innerHTML = directionsData.steps[2].maneuver;
                 }
                 if (y === lats1.length){
@@ -206,6 +224,9 @@ let directionsService = new google.maps.DirectionsService();
                 console.log('lngs',stepThreeLngs[z])
                 console.log('z',z);
                 console.log('interval3',interval3)
+
+                // renderiza las indicaciones y establece y elimina el método setInterval()
+
                 if (z === 2){
                   document.getElementById('msg').innerHTML = 'you are about to reach your destination';
                 }
