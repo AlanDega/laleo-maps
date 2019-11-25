@@ -29,7 +29,7 @@ map = new google.maps.Map( document.getElementById('map'), options);
     strokeColor: '#FF0000',
     strokeWeight: 3
   });
-  // posición inicial de los markers 
+  // posición inicial de los markers
 let laleo = {lat:19.386048, lng:-99.157093};
 let rebsamen = {lat:19.383660, lng:-99.161054};
 var mk1 = new google.maps.Marker({position: laleo, map: map});
@@ -45,34 +45,29 @@ let directionsRenderer = new google.maps.DirectionsRenderer();
   }
 
   directionsService.route(route,
-    function(response, status) { 
+    function(response, status) {
       if (status !== 'OK') {
         window.alert('Directions request failed due to ' + status);
         return;
       } else {
         console.log();
         directionsRenderer.setDirections(response);
-        var directionsData = response.routes[0].legs[0]; 
+        var directionsData = response.routes[0].legs[0];
         if (!directionsData) {
           window.alert('Directions request failed');
           return;
         }
         else {
           console.log('response',response)
-
-          //obtiene coordenadas del path
           const stepCoordenates = directionsData.steps[0].encoded_lat_lngs
           const stepCoordenates1 = directionsData.steps[1].encoded_lat_lngs
           const stepCoordenates2= directionsData.steps[2].encoded_lat_lngs
-
-          // decodifica coordenadas
           var decodedSets=google.maps.geometry.encoding.decodePath(stepCoordenates);
           var decodedSets1=google.maps.geometry.encoding.decodePath(stepCoordenates1);
           var decodedSets2=google.maps.geometry.encoding.decodePath(stepCoordenates2);
           const decodedStep = decodedSets.toString().replace(/,/g, "x").split("x");
           const decodedStep1 = decodedSets1.toString().replace(/,/g, "x").split("x");
           const decodedStep2 = decodedSets2.toString().replace(/,/g, "x").split("x");
-          
           var lats = []
           var lngs= []
           var lats1 = []
@@ -85,6 +80,8 @@ let directionsRenderer = new google.maps.DirectionsRenderer();
           var stepTwoLngs =[]
           var stepThreeLats =[]
           var stepThreeLngs=[]
+          var sumLats = []
+          var sumLngs = []
 
    // procesamiento de la información de las coordenadas para el paso 1 ------------------------------------------------
 
@@ -103,10 +100,10 @@ let directionsRenderer = new google.maps.DirectionsRenderer();
     // junta todas las coordenadas del paso 1 en un array de latitud y otro de longitud
 
           for (i=0; i < lats.length; i++){
-            stepOneLats.push(lats[i][0])
+            sumLats.push(lats[i][0])
           }
           for (i=0; i < lngs.length; i++){
-            stepOneLngs.push(lngs[i][0])
+              sumLngs.push(lngs[i][0])
           }
 
   // procesamiento de la información de las coordenadas para el paso 2 ------------------------------------------------
@@ -120,16 +117,16 @@ let directionsRenderer = new google.maps.DirectionsRenderer();
               var slicedStep4 = decodedStep1[i].substring(1).slice(0, -1);
               var concatStep4 = slicedStep4.concat('x').split("x");
               lngs1.push(concatStep4)
-            } 
-          } 
+            }
+          }
 
     // junta todas las coordenadas del paso 2 en un array de latitud y otro de longitud
 
           for (i=0; i < lats1.length; i++){
-            stepTwoLats.push(lats1[i][0])
+            sumLats.push(lats1[i][0])
           }
           for (i=0; i < lngs1.length; i++){
-            stepTwoLngs.push(lngs1[i][0])
+            sumLngs.push(lngs1[i][0])
           }
 
    // procesamiento de información de las coordenadas para el paso 3 ------------------------------------------------
@@ -143,19 +140,22 @@ let directionsRenderer = new google.maps.DirectionsRenderer();
               var slicedStep5 = decodedStep2[i].substring(1).slice(0, -1);
               var concatStep5= slicedStep5.concat('x').split("x");
               lngs2.push(concatStep5);
-              } 
+              }
           }
 
     // junta todas las coordenadas del paso 3 en un array de latitud y otro de longitud
-        
+
           for (i=0; i < lats2.length; i++){
-            stepThreeLats.push(lats2[i][0]);
+            sumLats.push(lats2[i][0]);
           }
           for (i=0; i < lngs2.length; i++){
-            stepThreeLngs.push(lngs2[i][0]);
+            sumLngs.push(lngs2[i][0]);
           }
-          
+
   // actualización de la posición del marker en el mapa -----------------------------------------------
+          console.log('sumLats',sumLats)
+          console.log('sumLngs',sumLngs)
+          console.log(lats1.length)
 
           let e = 1;
           let y = 0;
@@ -167,87 +167,55 @@ let directionsRenderer = new google.maps.DirectionsRenderer();
           let interval2 = minutes2 * 60000 / lats1.length;
           let interval3 = minutes3 * 60000 / lats2.length;
           var changes = setInterval(step1, interval1, e);
+          var changes2 = setInterval(step1, interval2, e);
+          var changes3 = setInterval(step1, interval3, e);
+
+
+
 
           if (e === 1){
                 document.getElementById('msg').innerHTML = directionsData.steps[0].instructions  + "(" + directionsData.steps[0].duration.text + ").";
               }
 
+                // renderiza las indicaciones y establece y elimina el método setInterval()
+// aqui puedo actulizar l avaribale interval de change para hcrlo idnamci con una funcdion dinamica y escalable
+
+
           function step1(){
-            laleo.lat = parseFloat(stepOneLats[e]);
-            laleo.lng = parseFloat(stepOneLngs[e]);
+            laleo.lat = parseFloat(sumLats[e]);
+            laleo.lng = parseFloat(sumLngs[e]);
             var myLatlng = new google.maps.LatLng(laleo.lat,laleo.lng);
             mk1.setPosition(myLatlng);
             e++;
             console.log('lats',stepOneLats[e]);
             console.log('lngs',stepOneLngs[e]);
             console.log('e',e);
-            console.log('interval1',interval1);
+            // console.log('interval1',interval1);
 
-            // renderiza las indicaciones y establece y elimina el método setInterval()
-              
-              if (e === lats.length -1){
-                document.getElementById('msg').innerHTML = directionsData.steps[1].instructions;
-              }
-              if (e === lats.length){
-                clearInterval(changes);
-                var changes2 = setInterval(step2, interval2, y);
-                document.getElementById('msg').innerHTML = directionsData.steps[1].maneuver;
-              }
-
-            function step2(){
-              laleo.lat = parseFloat(stepTwoLats[y])
-              laleo.lng = parseFloat(stepTwoLngs[y])
-              var myLatlng = new google.maps.LatLng(laleo.lat,laleo.lng);
-              mk1.setPosition(myLatlng)
-              y++
-              console.log('lats',stepTwoLats[y])
-              console.log('lngs',stepTwoLngs[y])
-              console.log('y',y);
-              console.log('interval2',interval2)
-
-              // renderiza las indicaciones y establece y elimina el método setInterval()
-
-                if (y === 2){
-                  document.getElementById('msg').innerHTML = directionsData.steps[2].instructions  + "(" + directionsData.steps[0].duration.text + ").";
-                }
-                if (y === lats1.length -2){
-                  document.getElementById('msg').innerHTML = directionsData.steps[2].maneuver;
-                }
-                if (y === lats1.length){
-                  clearInterval(changes2)
-                  var changes3 = setInterval(step3, interval3, z)
-                  document.getElementById('msg').innerHTML = directionsData.steps[2].maneuver;
-                }
-            
-              function step3(){
-                laleo.lat = parseFloat(stepThreeLats[z])
-                laleo.lng = parseFloat(stepThreeLngs[z])
-                var myLatlng = new google.maps.LatLng(laleo.lat,laleo.lng);
-                mk1.setPosition(myLatlng)
-                z++
-                console.log('lats',stepThreeLats[z])
-                console.log('lngs',stepThreeLngs[z])
-                console.log('z',z);
-                console.log('interval3',interval3)
-
-                // renderiza las indicaciones y establece y elimina el método setInterval()
-
-                if (z === 2){
+                if (e === lats.length){
+                  changes = setInterval(step1, interval2, e)
+                 console.log(interval2,'interval2')
                   document.getElementById('msg').innerHTML = 'you are about to reach your destination';
                 }
-                if (z === lats2.length){
-                  clearInterval(changes3)
-                  document.getElementById('msg').innerHTML = 'you have reached your destination';
+               
+                if (e ===  lats.length +lats1.length){
+                  changes = setInterval(step1, interval3, e);
 
+                  console.log(interval3,'interval3')
+
+                  document.getElementById('msg').innerHTML = 'you have reached your destination';
+                }
+               
+                if (e === lats2.length){
+                  clearInterval(changes)
+                  document.getElementById('msg').innerHTML = 'you have reached your destination';
                 }
               }
             }
           }
         }
-      }           
-    })  
-  }
-
+        // despues tratar sin var solo cambiandol a def de la rpimer variable
+  )}
   </script>
   <script async defer
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCq_veR7_aDqXBF5rkZA15FDgARAPzuvo4&callback=initMap">
